@@ -1,0 +1,122 @@
+@page "/loans"
+@inject ILibraryService LibraryService
+
+<PageTitle>Выдача книг</PageTitle>
+
+<h1>Выдача книг</h1>
+<p>Здесь можно оформить выдачу книги читателю и отметить возврат.</p>
+
+<div class="panel">
+    <h2>Оформить выдачу</h2>
+    <div class="form-grid">
+        <label>
+            Книга
+            <select @bind="model.BookIdText">
+                <option value="">-- выберите книгу --</option>
+                @foreach (var book in availableBooks)
+                {
+                    <option value="@book.Id">@book.Title (@book.AvailableCopies доступно)</option>
+                }
+            </select>
+        </label>
+        <label>
+            Читатель
+            <select @bind="model.ReaderIdText">
+                <option value="">-- выберите читателя --</option>
+                @foreach (var reader in readers)
+                {
+                    <option value="@reader.Id">@reader.FullName, @reader.ClassName</option>
+                }
+            </select>
+        </label>
+        <label>Дата возврата <input @bind="model.ReturnUntilText" placeholder="2026-06-01" /></label>
+    </div>
+    <button class="primary" @onclick="CreateLoanAsync">Выдать книгу</button>
+    <ErrorList Errors="errors" />
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p class="success">@message</p>
+    }
+</div>
+
+<h2>Активные выдачи</h2>
+@if (activeLoans.Count == 0)
+{
+    <p>Активных выдач нет.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Книга</th>
+                <th>Читатель</th>
+                <th>Выдана</th>
+                <th>Вернуть до</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var loan in activeLoans)
+        {
+            <tr>
+                <td>@loan.Book.Title</td>
+                <td>@loan.Reader.FullName</td>
+                <td>@loan.IssuedAt.ToString("dd.MM.yyyy")</td>
+                <td>@loan.ReturnUntil.ToString("dd.MM.yyyy")</td>
+                <td><button @onclick="() => ReturnLoanAsync(loan.Id)">Вернуть</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Book> availableBooks = new();
+    private List<Reader> readers = new();
+    private List<Loan> activeLoans = new();
+    private LoanFormModel model = new();
+    private List<string> errors = new();
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        availableBooks = await LibraryService.GetAvailableBooksAsync();
+        readers = await LibraryService.GetReadersAsync();
+        activeLoans = await LibraryService.GetActiveLoansAsync();
+    }
+
+    private async Task CreateLoanAsync()
+    {
+        message = null;
+        errors.Clear();
+        var result = await LibraryService.CreateLoanAsync(model);
+        if (!result.Success)
+        {
+            errors = result.Errors;
+            return;
+        }
+        model = new LoanFormModel();
+        message = "Выдача оформлена.";
+        await LoadAsync();
+    }
+
+    private async Task ReturnLoanAsync(int loanId)
+    {
+        message = null;
+        errors.Clear();
+        var result = await LibraryService.ReturnLoanAsync(loanId);
+        if (!result.Success)
+        {
+            errors = result.Errors;
+            return;
+        }
+        message = "Возврат выполнен.";
+        await LoadAsync();
+    }
+}

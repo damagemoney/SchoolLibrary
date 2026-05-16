@@ -1,0 +1,45 @@
+ИНСТРУКЦИЯ ПО ЗАПУСКУ КУРСОВОГО ПРОЕКТА
+Тема: Школьная библиотека
+Вариант: 25
+Порт: 8025
+
+1. Распаковать архив проекта в отдельную пустую папку, например:
+   C:\Users\User\Desktop\SchoolLibraryCoursework_variant25
+
+2. Открыть PowerShell в папке проекта. В этой папке должны лежать файлы:
+   SchoolLibraryApp.csproj
+   Dockerfile
+   docker-compose.yml
+   Program.cs
+
+3. Проверить, что Docker Desktop запущен.
+   Команда проверки:
+   docker ps
+
+4. Запустить проект:
+   docker compose up -d --build
+
+5. Проверить контейнеры:
+   docker compose ps
+
+   Должны быть запущены контейнеры:
+   school_library_app
+   school_library_db
+
+6. Открыть приложение в браузере:
+   http://localhost:8025
+
+7. Для остановки проекта:
+   docker compose down
+
+8. Для полной очистки вместе с базой данных:
+   docker compose down -v
+
+9. Для публикации в Docker Hub заменить username в docker-compose.yml или создать .env:
+   copy .env.example .env
+   notepad .env
+
+   Затем выполнить:
+   docker login
+   docker build -t username/school-library-coursework:25 .
+   docker push username/school-library-coursework:25

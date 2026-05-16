@@ -1,0 +1,76 @@
+@page "/readers"
+@inject ILibraryService LibraryService
+
+<PageTitle>Читатели</PageTitle>
+
+<h1>Читатели</h1>
+<p>Раздел предназначен для регистрации учеников, которые пользуются школьной библиотекой.</p>
+
+<div class="panel">
+    <h2>Добавить читателя</h2>
+    <div class="form-grid">
+        <label>ФИО <input @bind="model.FullName" /></label>
+        <label>Класс <input @bind="model.ClassName" placeholder="7А" /></label>
+        <label>Email <input @bind="model.Email" /></label>
+    </div>
+    <button class="primary" @onclick="AddReaderAsync">Добавить читателя</button>
+    <ErrorList Errors="errors" />
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p class="success">@message</p>
+    }
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ФИО</th>
+            <th>Класс</th>
+            <th>Email</th>
+            <th>Номер билета</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var reader in readers)
+    {
+        <tr>
+            <td>@reader.FullName</td>
+            <td>@reader.ClassName</td>
+            <td>@reader.Email</td>
+            <td>@reader.Card?.Number</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private List<Reader> readers = new();
+    private ReaderFormModel model = new();
+    private List<string> errors = new();
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        readers = await LibraryService.GetReadersAsync();
+    }
+
+    private async Task AddReaderAsync()
+    {
+        message = null;
+        errors.Clear();
+        var result = await LibraryService.AddReaderAsync(model);
+        if (!result.Success)
+        {
+            errors = result.Errors;
+            return;
+        }
+        model = new ReaderFormModel();
+        message = "Читатель добавлен.";
+        await LoadAsync();
+    }
+}

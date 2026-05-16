@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKERHUB_USERNAME:-username}/school-library-coursework:25
+    container_name: school_library_app
+    restart: unless-stopped
+    ports:
+      - "8025:8080"
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=school_library_db;Username=library_user;Password=library_password
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    container_name: school_library_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: school_library_db
+      POSTGRES_USER: library_user
+      POSTGRES_PASSWORD: library_password
+    volumes:
+      - school_library_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U library_user -d school_library_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  school_library_pgdata:

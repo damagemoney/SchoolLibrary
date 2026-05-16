@@ -1,0 +1,40 @@
+@page "/"
+@inject ILibraryService LibraryService
+
+<PageTitle>Школьная библиотека</PageTitle>
+
+<h1>Информационная система школьной библиотеки</h1>
+<p class="lead">Приложение предназначено для учета книг, читателей и выдач в школьной библиотеке.</p>
+
+@if (stats is null)
+{
+    <p>Загрузка статистики...</p>
+}
+else
+{
+    <div class="cards">
+        <div class="card"><strong>@stats.TotalBooks</strong><span>книг в каталоге</span></div>
+        <div class="card"><strong>@stats.AvailableCopies</strong><span>доступных экземпляров</span></div>
+        <div class="card"><strong>@stats.TotalReaders</strong><span>читателей</span></div>
+        <div class="card"><strong>@stats.ActiveLoans</strong><span>активных выдач</span></div>
+    </div>
+}
+
+<section class="panel">
+    <h2>Возможности системы</h2>
+    <ul>
+        <li>ведение каталога школьных книг;</li>
+        <li>регистрация учеников-читателей;</li>
+        <li>оформление выдачи книги ученику;</li>
+        <li>контроль возврата книг и доступных экземпляров.</li>
+    </ul>
+</section>
+
+@code {
+    private LibraryStats? stats;
+
+    protected override async Task OnInitializedAsync()
+    {
+        stats = await LibraryService.GetStatsAsync();
+    }
+}

@@ -1,0 +1,91 @@
+@page "/books"
+@inject ILibraryService LibraryService
+
+<PageTitle>Каталог книг</PageTitle>
+
+<h1>Каталог книг</h1>
+<p>На странице отображается список книг школьной библиотеки и форма добавления новой книги.</p>
+
+<div class="panel">
+    <h2>Добавить книгу</h2>
+    <div class="form-grid">
+        <label>Название <input @bind="model.Title" /></label>
+        <label>Автор <input @bind="model.Author" /></label>
+        <label>ISBN <input @bind="model.Isbn" /></label>
+        <label>Год <input @bind="model.PublishedYearText" /></label>
+        <label>Жанр <input @bind="model.Genre" /></label>
+        <label>Категории <input @bind="model.CategoriesText" placeholder="Учебник, литература" /></label>
+        <label>Экземпляров <input @bind="model.TotalCopiesText" /></label>
+    </div>
+    <button class="primary" @onclick="AddBookAsync">Добавить книгу</button>
+    <ErrorList Errors="errors" />
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <p class="success">@message</p>
+    }
+</div>
+
+@if (books.Count == 0)
+{
+    <p>Книги не найдены.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Название</th>
+                <th>Автор</th>
+                <th>Год</th>
+                <th>Жанр</th>
+                <th>Категории</th>
+                <th>Доступно</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var book in books)
+        {
+            <tr>
+                <td>@book.Title</td>
+                <td>@book.Author</td>
+                <td>@book.PublishedYear</td>
+                <td>@book.Genre</td>
+                <td>@string.Join(", ", book.Categories.Select(c => c.Name))</td>
+                <td>@book.AvailableCopies из @book.TotalCopies</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Book> books = new();
+    private BookFormModel model = new();
+    private List<string> errors = new();
+    private string? message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        books = await LibraryService.GetBooksAsync();
+    }
+
+    private async Task AddBookAsync()
+    {
+        message = null;
+        errors.Clear();
+        var result = await LibraryService.AddBookAsync(model);
+        if (!result.Success)
+        {
+            errors = result.Errors;
+            return;
+        }
+        model = new BookFormModel();
+        message = "Книга добавлена.";
+        await LoadAsync();
+    }
+}

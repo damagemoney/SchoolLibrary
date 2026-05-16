@@ -1,0 +1,13 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+.git/
+.gitignore
+README.md
+COMMANDS_FOR_REPORT.md
+*.user
+*.suo
+*.db
+*.sqlite
+*.zip

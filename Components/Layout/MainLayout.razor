@@ -1,0 +1,16 @@
+@inherits LayoutComponentBase
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">Школьная библиотека</div>
+        <nav>
+            <NavLink href="" Match="NavLinkMatch.All">Главная</NavLink>
+            <NavLink href="books">Книги</NavLink>
+            <NavLink href="readers">Читатели</NavLink>
+            <NavLink href="loans">Выдача</NavLink>
+        </nav>
+    </aside>
+    <main class="content">
+        @Body
+    </main>
+</div>
