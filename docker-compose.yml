@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${DOCKERHUB_USERNAME:-username}/school-library-coursework:25
+    image: ${DOCKERHUB_USERNAME:-damagemoney}/school-library-coursework:25
     container_name: school_library_app
     restart: unless-stopped
     ports:
